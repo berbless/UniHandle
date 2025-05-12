@@ -28,6 +28,7 @@ class UniWrap:
     def __len__(self):
         """Return the quantity of args."""
         count = self.__function.__code__.co_argcount
+        # TODO: Optional flags, how?
         if inspect.ismethod(self.__function):
             count -= 1
         return count
