@@ -60,159 +60,6 @@ class DSALinkedListDouble:
     def __sizeof__(self):
         return self.length()
 
-    def __get_at(self, index):
-        next_node = None
-
-        # do error checking (empty, or out of range)
-        if self.length() <= index and index < 0 or (self.is_empty()):
-            print(f"{index} is out of range of list")
-        else:
-            count = 0
-            next_node = self.__head
-            # while in list and before index (just in case)
-            while count < index:
-                count += 1
-                # TODO Continue Here
-                next_node.get_next()
-
-        return next_node
-
-    # def insert_at(self, index, value):
-    #     """TBDOCCED"""
-    #     # if not asking for first
-    #     if index == 0:
-    #         # return popped first
-    #         self.insert_first(value)
-    #     elif index == (self.__count - 1):
-    #         # if last do opposite
-    #         self.insert_last(value)
-    #     else:
-    #         # get the node at the index
-    #         next_node = self.__get_at(index)
-    #         if next_node is not None:
-    #             # get last next
-    #             old = next_node.get_next()
-    #             # set the new node to next
-    #             next_node.set_next(DSAListNodeDouble(value, old))
-    #             # add one to count
-    #             self.__count +=1
-
-    def peek_at(self, index):
-        """TBDOCCED"""
-        # TODO AAA
-        # if not asking for first
-        if index == 0:
-            # return popped first
-            return self.peek_first()
-        elif index == (self.__count - 1):
-            # if last do opposite
-            return self.peek_last()
-        else:
-            # return the value of the spot
-            output = self.__get_at(index)
-            # if not None, pull value
-            if output is not None:
-                output = output.get_value()
-            return output
-
-    def pop_at(self, index):
-        """TBDOCCED"""
-        # TODO AAAAAAAAAAAAAAA
-        # if not asking for first
-        if index == 0:
-            # return popped first
-            return self.pop_first()
-        elif index == (self.__count - 1):
-            # if last do opposite
-            return self.pop_last()
-        else:
-            # get node before
-            node = self.__get_at(index - 1)
-            next_node = None
-            # if the value isn't the last
-            if node is not None and node.get_next() is not None:
-                # get node to remove
-                next_node = node.get_next()
-                # set the previos nodes next to the next nodes next.
-                node.set_next(next_node.get_next())
-                # If there is at least one more node to the right
-                if not node.get_next() is None:
-                    # Set that nodes prev to not include the dropped
-                    node.get_next().set_prev(node)
-                else:
-                    # Else, it must be at the end now.
-                    self.__tail = node
-                # decrement the node count
-                self.__count -= 1
-
-            # return value
-            return next_node
-
-
-    def __validate_custom(self, func):
-        # Function Must:
-        # Accept a Node
-        # Proccess it individually (or with one extra either side at most)
-        # Return a boolean value
-        try:
-            # if the function passes the tests, allow.
-            is_valid = True
-            if func.__code__.co_argcount < 1:
-                is_valid = False
-            else:
-                # make a dummy list of two items
-                dummy = DSALinkedListDouble()
-                dummy.insert_first("a")
-                dummy.insert_last("b")
-                dummy.insert_last("c")
-                # attempt to run the middle node through it
-                output = func(dummy.peek_at(1))
-                # If the return type isn't a bool
-                if not isinstance(output, bool):
-                    # invalid
-                    is_valid = False
-        # If it cannot handle the peram count (1)
-        except TypeError:
-            # It isn't going to work
-            is_valid = False
-
-        return is_valid
-
-    def find_custom(self, function, skip_validation = False):
-        """function | Find a node that matches the custom value"""
-        # If not, itterate through
-        node = None
-
-        # if the custom function is correct (can handle running)
-        if skip_validation or self.__validate_custom(function):
-            node = self.__head
-
-            # while neither at end OR
-            while not node is None and not function(node):
-                # get the next
-                node = node.get_next()
-        else:
-            print("invalid filter function!")
-
-        return node
-
-    def find(self, value):
-        """Find a node with value"""
-        node = None
-
-        # If empty
-        if self.is_empty():
-            print("List is empty")
-        else:
-            # If not, itterate through
-            node = self.__head
-            # check that
-            self.find_custom(lambda node: node.get_value() != value)
-
-        return node
-
-
-
     def insert_first(self, value):
         """TBDOCCED"""
         # make a new node with head as next
@@ -253,10 +100,7 @@ class DSALinkedListDouble:
 
     def get_first(self):
         """TBDOCCED"""
-        output = self.__head
-        if output is not None:
-            output = output
-        return output
+        return self.__head
 
     def peek_first(self):
         """TBDOCCED"""
@@ -267,10 +111,7 @@ class DSALinkedListDouble:
 
     def get_last(self):
         """TBDOCCED"""
-        output = self.__tail
-        if output is not None:
-            output = output
-        return output
+        return self.__tail
 
     def peek_last(self):
         """TBDOCCED"""
