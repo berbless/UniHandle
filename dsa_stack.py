@@ -1,4 +1,4 @@
-from DSAListDouble import DSALinkedListDouble
+from dsa_double_list import DSALinkedListDouble
 import sys
 
 class DSAStack:
@@ -17,12 +17,12 @@ class DSAStack:
         return (self.__current_count < 1)
 
     def __str__(self):
-            node = self.__list.get_first()
-            output = ""
-            while node is not None:
-                output += node.get_value() + ", "
-                node = node.get_next()
-            return output
+        node = self.__list.get_first()
+        output = ""
+        while node is not None:
+            output += node.get_value() + ", "
+            node = node.get_next()
+        return output
 
     def count(self):
         # return current count

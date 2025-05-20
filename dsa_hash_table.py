@@ -282,14 +282,12 @@ class DSAHashTable:
             itterable += 1
         print(f"Count: {count} | Length {self.__max} | {self.get_load()}")
 
-    def load_csv(self, fileName):
-        """fileName | open the file, load the csv."""
+    def load_csv(self, file_name):
+        """file_name | open the file, load the csv."""
         # itterable for reporting line errors.
         itterable = 0
-        # buffer for the file data.
-        data = ""
 
-        with open(fileName, "r") as file:
+        with open(file_name, "r") as file:
             for line in file.readlines():
                 itterable += 1
                 if len(line.split(",")) != 2:

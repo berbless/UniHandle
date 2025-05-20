@@ -1,4 +1,4 @@
-from DSAListDouble import DSALinkedListDouble
+from dsa_double_list import DSALinkedListDouble
 import sys
 
 class DSAQueue:
@@ -8,7 +8,7 @@ class DSAQueue:
     # Current count of elements
     __current_count = 0
 
-    def __init__(self, count = 100):
+    def __init__(self):
         # Set dimentions of array
         self.__list = DSALinkedListDouble()
 
