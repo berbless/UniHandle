@@ -42,6 +42,7 @@ class DSALinkedListDouble:
     __head = None
     __tail = None
     __count = 0
+    __itterable_head = None
 
     def __init__(self, value=None):
         # Set a head if given
@@ -57,8 +58,32 @@ class DSALinkedListDouble:
         """TBDOCCED"""
         return self.__count
 
+    def __len__(self):
+        return self.__count
+
     def __sizeof__(self):
         return self.length()
+
+    # 21/05/25 - 6:20pm https://www.w3schools.com/python/python_iterators.asp
+    def __iter__(self):
+        self.__itterable_head = self.__head
+        return self
+
+    # 21/05/25 - 6:20pm https://www.w3schools.com/python/python_iterators.asp
+    def __next__(self):
+        current = None
+        # if not still in array
+        if self.__itterable_head is not None:
+            # get current
+            current = self.__itterable_head
+            # itterate to the next item
+            self.__itterable_head = self.__itterable_head.get_next()
+            # return current.
+            return current.get_value()
+        else:
+            # raise, end of itteration
+            raise StopIteration
+
 
     def insert_first(self, value):
         """TBDOCCED"""
@@ -122,11 +147,10 @@ class DSALinkedListDouble:
 
     def pop_first(self):
         """TBDOCCED"""
+        output = None
         # if not empty
-        if self.is_empty():
-            print("List is empty")
-        else:
-            old = self.__head
+        if not self.is_empty():
+            output = self.__head
             # get next to head
             next_node = self.__head.get_next()
             # set as head
@@ -138,17 +162,16 @@ class DSALinkedListDouble:
                 self.__head.set_prev(None)
 
             # return last head
-            if old is not None:
-                old = old.get_value()
-            return old
+            if output is not None:
+                output = output.get_value()
+        return output
 
     def pop_last(self):
         """TBDOCCED"""
+        output = None
         # if not empty
-        if self.is_empty():
-            print("List is empty")
-        else:
-            old = self.__tail
+        if not self.is_empty():
+            output = self.__tail
             # get next to head
             prev = self.__tail.get_prev()
             # set as head
@@ -160,6 +183,6 @@ class DSALinkedListDouble:
                 self.__tail.set_next(None)
 
             # return last head
-            if old is not None:
-                old = old.get_value()
-            return old
+            if output is not None:
+                output = output.get_value()
+        return output
