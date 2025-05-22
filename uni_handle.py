@@ -8,8 +8,15 @@ Description: Simple universal args and menu tool for executing python functions.
 
 from copy import copy
 import inspect
-from dsa_double_list import DSALinkedListDouble
-from dsa_hash_table import DSAHashTable
+
+# If importing as a test, import directly
+if __name__ == "__main__":
+    from dsa_double_list import DSALinkedListDouble
+    from dsa_hash_table import DSAHashTable
+else:
+    # If being imported during runtime, then reference from the module
+    from UniHandle.dsa_double_list import DSALinkedListDouble
+    from UniHandle.dsa_hash_table import DSAHashTable
 
 class UniWrap:
     """
@@ -260,10 +267,8 @@ class UniHandle:
         # Form each key into a formatted structure
         # Return every key and description
         key_set = self.__options_dict.keys()
-        # get key shortcuts
-        out_string = ""
-        out_string += "\n<Enter> Show options again"
-        out_string += "\n<Ctrl+C> Force quit"
+        # get key shortcut
+        out_string = "<Enter> Show options again"
         # get function keys
         for key in key_set:
             out_string += f"\n{key}:   {self.__options_dict[key]}"
