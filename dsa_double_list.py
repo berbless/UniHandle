@@ -84,6 +84,11 @@ class DSALinkedListDouble:
             # raise, end of itteration
             raise StopIteration
 
+    # used for converting argv into a constructed list
+    def import_list(self, argv):
+        """Import the sys args to non in-built, as it comes through as a default list."""
+        for item in argv:
+            self.insert_last(item)
 
     def insert_first(self, value):
         """TBDOCCED"""

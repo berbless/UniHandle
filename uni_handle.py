@@ -7,7 +7,8 @@ Description: Simple universal args and menu tool for executing python functions.
 """
 
 from copy import copy
-import inspect
+from inspect import ismethod
+from sys import argv
 
 # If importing as a test, import directly
 if __name__ == "__main__":
@@ -36,8 +37,8 @@ class UniWrap:
     def __len__(self):
         """Return the quantity of args."""
         count = self.__function.__code__.co_argcount
-        # TODO: Optional flags, how?
-        if inspect.ismethod(self.__function):
+        # TODO: Optional flags, how? Read all as such.
+        if ismethod(self.__function):
             count -= 1
         return count
 
@@ -110,32 +111,54 @@ class UniHandle:
 
     def __call__(self):
         """Initialises and runs proccess."""
+        # create holder for system args
+        sys_inputs = DSALinkedListDouble()
+        # import and convert them to assignment legal object
+        sys_inputs.import_list(argv)
+        # remove the initial flag (filename)
+        sys_inputs.pop_first()
+
+        # try catch wrapper for keyboard interupts
+        try:
+            # If user input is given through sys argv
+            if sys_inputs.length() > 0:
+                # generate a list of functions with the args attributed to each.
+                sys_inputs = self.__compile_funcs(sys_inputs)
+                # send these coalated args into the exectution func
+                self.__execute_funcs(sys_inputs)
+
+            # open the menu if need to
+            if self.__keep_running:
+                # perform the menu loop (if set to do so)
+                self.__menu_loop()
+
+        except KeyboardInterrupt:
+            # manual exit forced immediately
+            print(f"\n{self.exit()}")
+
+    def __menu_loop(self):
+        # input stages
         raw_args = ""
         seperated_args = DSALinkedListDouble()
         compiled_funcs = DSALinkedListDouble()
 
-        # try catch wrapper for keyboard interupts
-        try:
-            # print options
-            print(self)
+        # print options
+        print(self)
 
-            while self.__keep_running:
-                # get user input
-                raw_args = input("> ")
-                # If nothing hath been given
-                if raw_args == "":
-                    # print options
-                    print(self)
-                else:
-                    # convert the input string into args
-                    seperated_args = self.__proccess_text(raw_args)
-                    # generate a list of functions with the args attributed to each.
-                    compiled_funcs = self.__compile_funcs(seperated_args)
-                    # send these coalated args into the exectution func
-                    self.__execute_funcs(compiled_funcs)
-        except KeyboardInterrupt:
-            # manual exit forced immediately
-            print(f"\n{self.exit()}")
+        while self.__keep_running:
+            # get user input
+            raw_args = input("> ")
+            # If nothing hath been given
+            if raw_args == "":
+                # print options
+                print(self)
+            else:
+                # convert the input string into args
+                seperated_args = self.__proccess_text(raw_args)
+                # generate a list of functions with the args attributed to each.
+                compiled_funcs = self.__compile_funcs(seperated_args)
+                # send these coalated args into the exectution func
+                self.__execute_funcs(compiled_funcs)
 
     def exit(self):
         """Exit after all queued commands."""
@@ -268,7 +291,7 @@ class UniHandle:
         # Return every key and description
         key_set = self.__options_dict.keys()
         # get key shortcut
-        out_string = "<Enter> Show options again"
+        out_string = "\n<Enter> Show options again"
         # get function keys
         for key in key_set:
             out_string += f"\n{key}:   {self.__options_dict[key]}"
