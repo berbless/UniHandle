@@ -7,6 +7,7 @@ Description: Simple universal args and menu tool for executing python functions.
 """
 
 from copy import copy
+from os import name, system
 from inspect import ismethod
 from sys import argv
 
@@ -107,6 +108,7 @@ class UniHandle:
         self.__keep_running = keep_open
         # manually add the exit command
         self.__options_dict["exit"] = UniWrap(self.exit, "exit")
+        self.__options_dict["clear"] = UniWrap(self.clear, "clear")
 
 
     def __call__(self):
@@ -164,6 +166,20 @@ class UniHandle:
         """Exit after all queued commands."""
         self.__keep_running = False
         return "Exit queued."
+
+    # Source (01.06.25) https://www.geeksforgeeks.org/clear-screen-python/
+    def clear(self):
+        """Clear the terminal."""
+        # windows support
+        if name == "nt":
+            system("cls")
+        # Linux / MacOS support
+        elif name == "posix":
+            system("clear")
+        else:
+            # If not one of the three, strange things have happened.
+            # You're on your own.
+            print(f"OS ({name}) is not yet supported.")
 
 
     def __setitem__(self, key, function):
