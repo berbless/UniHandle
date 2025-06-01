@@ -11,14 +11,18 @@ from os import name, system
 from inspect import ismethod
 from sys import argv
 
+from dsa_double_list import DSALinkedListDouble
+from dsa_hash_table import DSAHashTable
+
 # If importing as a test, import directly
 if __name__ == "__main__":
     from dsa_double_list import DSALinkedListDouble
     from dsa_hash_table import DSAHashTable
 else:
     # If being imported during runtime, then reference from the module
-    from UniHandle.dsa_double_list import DSALinkedListDouble
-    from UniHandle.dsa_hash_table import DSAHashTable
+    # from .dsa_double_list import DSALinkedListDouble
+    # from .dsa_hash_table import DSAHashTable
+    pass
 
 class UniWrap:
     """
@@ -96,19 +100,21 @@ class UniWrap:
 class UniHandle:
     """Universal args and menu tool."""
     # Stored items/functions
-    __options_dict = {}
-
+    __options_dict = DSAHashTable(4)
+    # keys in order (since there is no removing keys, should be a-ok)
+    __keys = DSALinkedListDouble()
     # Keep the program running
     __keep_running = True
 
-    def __init__(self, keep_open = False):
+    def __init__(self, keep_open = False, include_predefined = True):
         """
         keepOpen: boolean - decides if a close command is needed.
         """
         self.__keep_running = keep_open
-        # manually add the exit command
-        self.__options_dict["exit"] = UniWrap(self.exit, "exit")
-        self.__options_dict["clear"] = UniWrap(self.clear, "clear")
+        # add the predefined commands
+        if include_predefined:
+            self["exit"] = self.exit
+            self["clear"] = self.clear
 
 
     def __call__(self):
@@ -185,6 +191,7 @@ class UniHandle:
     def __setitem__(self, key, function):
         """Add a new option to execute | [key] = (func, decription)"""
         self.__options_dict[key] = UniWrap(function, key)
+        self.__keys.insert_last(key)
 
 
     def __getitem__(self, key):
@@ -239,7 +246,7 @@ class UniHandle:
         func = None
 
         # Do basic validation testing
-        if not self.__options_dict.keys().__contains__(word):
+        if not self.__options_dict.has_key(word):
             print(f"{word} is not a valid key.")
 
         elif self.__options_dict[word] is None:
@@ -273,7 +280,7 @@ class UniHandle:
                 args.pop_first()
 
                 # while the next is not a word to execute
-                while len(args) > 0 and not self.__options_dict.keys().__contains__(args.peek_first()):
+                while len(args) > 0 and not self.__options_dict.has_key(args.peek_first()):
                     # remove the next arg and add it to the list of args connected to the func
                     func_args.insert_last(args.pop_first())
 
@@ -303,12 +310,9 @@ class UniHandle:
 
     def __str__(self):
         """Return the stored values as a text block \\n seperated."""
-        # Form each key into a formatted structure
-        # Return every key and description
-        key_set = self.__options_dict.keys()
         out_string = ""
         # get function keys
-        for key in key_set:
+        for key in self.__keys:
             out_string += f"\n{key}:   {self.__options_dict[key]}"
         return out_string
 
