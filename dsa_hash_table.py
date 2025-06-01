@@ -54,6 +54,7 @@ class DSAHashTable:
     class Empty:
         """Nething borgar"""
         def key(self, hask):
+            # TODO: Remove
             """Return None"""
             return ""
 
