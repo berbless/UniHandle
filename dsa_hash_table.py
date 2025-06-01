@@ -43,9 +43,13 @@ class DSAHashTable:
             if hask == self.__hask:
                 return self.__key
 
-        def dump(self):
-            """Shh, its a secret."""
-            return (self.__key, self.__value)
+        def get_key(self):
+            """Return the stored key"""
+            return self.__key
+
+        def get_value(self):
+            """Return the stored value"""
+            return self.__value
 
     class Empty:
         """Nething borgar"""
@@ -60,6 +64,12 @@ class DSAHashTable:
         self.__max = self.get_closest_prime(self.__max)
         # set the array
         self.__hash_array = np.empty(self.__max, dtype=object)
+
+    def __setitem__(self, key, value):
+        self.put(key, value)
+
+    def __getitem__(self, key):
+        return self.get(key)
 
     def __hash(self, key_value):
         """key | hash the key"""
@@ -157,10 +167,8 @@ class DSAHashTable:
             item = old_table[itterable]
             # if it is an item
             if isinstance(item, self._DSAHashEntry):
-                # dump the values
-                val = item.dump()
                 # add the data back in a new hash
-                self.put(val[0], val[1])
+                self.put(item.get_key(), item.get_value())
             itterable += 1
         self.__do_resize = True
         itterable = 0
@@ -206,9 +214,7 @@ class DSAHashTable:
 
         # attempt an item get
         if hask is not None:
-            item = self.__hash_array[hask]
-            print(item.key(hask))
-            print(item.get(hask))
+            item = self.__hash_array[hask].get_value()
         else:
             print(f"{key} not in the hash table.")
 
@@ -267,20 +273,20 @@ class DSAHashTable:
         """key | does this key exist in the table?"""
         return self.__has_key(key) is not None
 
-    def __print_array(self):
-        itterable = 0
-        count = 0
-        print("")
-        while itterable < self.__max:
-            if isinstance(self.__hash_array[itterable], self.Empty):
-                print(f"[{itterable}] Empty")
-            elif self.__hash_array[itterable] is not None:
-                print(f"[{itterable}] {self.__hash_array[itterable].dump()}")
-                count += 1
-            else:
-                print(f"[{itterable}] None")
-            itterable += 1
-        print(f"Count: {count} | Length {self.__max} | {self.get_load()}")
+    # def __print_array(self):
+    #     itterable = 0
+    #     count = 0
+    #     print("")
+    #     while itterable < self.__max:
+    #         if isinstance(self.__hash_array[itterable], self.Empty):
+    #             print(f"[{itterable}] Empty")
+    #         elif self.__hash_array[itterable] is not None:
+    #             print(f"[{itterable}] {self.__hash_array[itterable].dump()}")
+    #             count += 1
+    #         else:
+    #             print(f"[{itterable}] None")
+    #         itterable += 1
+    #     print(f"Count: {count} | Length {self.__max} | {self.get_load()}")
 
     def load_csv(self, file_name):
         """file_name | open the file, load the csv."""
