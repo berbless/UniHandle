@@ -66,6 +66,7 @@ class DSAHashTable:
         self.__hash_array = np.empty(self.__max, dtype=object)
 
     def __setitem__(self, key, value):
+        """Set item"""
         self.put(key, value)
 
     def __getitem__(self, key):
@@ -287,22 +288,3 @@ class DSAHashTable:
     #             print(f"[{itterable}] None")
     #         itterable += 1
     #     print(f"Count: {count} | Length {self.__max} | {self.get_load()}")
-
-    def load_csv(self, file_name):
-        """file_name | open the file, load the csv."""
-        # itterable for reporting line errors.
-        itterable = 0
-
-        with open(file_name, "r") as file:
-            for line in file.readlines():
-                itterable += 1
-                if len(line.split(",")) != 2:
-                    # the line does not have just a key value pair.abs
-                    print(f"Error on line {itterable}: Not correct amount of entries")
-                    print("Needs: 2 (key,value)")
-                    print(f"Given: {len(line.split(","))} ({line})")
-                else:
-                    # try to add the data
-                    line = line.strip("\n")
-                    print(f"Attempting Add {itterable}: ({line})")
-                    self.put(line.split(",")[0], line.split(",")[1])
