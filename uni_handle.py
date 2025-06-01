@@ -306,8 +306,7 @@ class UniHandle:
         # Form each key into a formatted structure
         # Return every key and description
         key_set = self.__options_dict.keys()
-        # get key shortcut
-        out_string = "\n<Enter> Show options again"
+        out_string = ""
         # get function keys
         for key in key_set:
             out_string += f"\n{key}:   {self.__options_dict[key]}"
