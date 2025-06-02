@@ -99,9 +99,9 @@ class UniWrap:
 class UniHandle:
     """Universal args and menu tool."""
     # Stored items/functions
-    __options_dict = DSAHashTable(4)
+    __options_dict = None
     # keys in order (since there is no removing keys, should be a-ok)
-    __keys = DSALinkedListDouble()
+    __keys = None
     # Keep the program running
     __keep_running = True
 
@@ -109,6 +109,10 @@ class UniHandle:
         """
         keepOpen: boolean - decides if a close command is needed.
         """
+        # assign the objects here to prevent pointer sharing hell
+        self.__options_dict = DSAHashTable(4)
+        self.__keys = DSALinkedListDouble()
+
         self.__keep_running = keep_open
         # add the predefined commands
         if include_predefined:
