@@ -224,11 +224,11 @@ class UniHandle:
             elif char == "\"":
                 is_brackets = not is_brackets
             # if a space is inserted not in brackets
-            elif char == " " and not is_brackets:
+            elif char == " " and not is_brackets and not last_item.get_value() == "":
                 # add a new entry
                 output_list.insert_last("")
             # if none of the above, it is just a regular char, or in brackets
-            else:
+            elif char != " " or is_brackets:
                 # append to the last item in the list
                 last_item.set_value(last_item.get_value() + char)
 
