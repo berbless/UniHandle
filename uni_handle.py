@@ -11,18 +11,14 @@ from os import name, system
 from inspect import ismethod
 from sys import argv
 
-from dsa_double_list import DSALinkedListDouble
-from dsa_hash_table import DSAHashTable
-
 # If importing as a test, import directly
 if __name__ == "__main__":
     from dsa_double_list import DSALinkedListDouble
     from dsa_hash_table import DSAHashTable
 else:
     # If being imported during runtime, then reference from the module
-    # from .dsa_double_list import DSALinkedListDouble
-    # from .dsa_hash_table import DSAHashTable
-    pass
+    from UniHandle.dsa_double_list import DSALinkedListDouble
+    from UniHandle.dsa_hash_table import DSAHashTable
 
 class UniWrap:
     """
