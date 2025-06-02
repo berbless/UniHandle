@@ -51,6 +51,10 @@ class UniWrap:
         """Return function description"""
         return self.__function.__doc__
 
+    def get_doc(self):
+        """Dirty hack to get if this has a docstring to print."""
+        return self.__function.__doc__
+
     def __call__(self):
         """
         Execute the stored Function with the stored args.
@@ -109,8 +113,9 @@ class UniHandle:
         self.__keep_running = keep_open
         # add the predefined commands
         if include_predefined:
-            self["exit"] = self.exit
-            self["clear"] = self.clear
+            self["exit"] = self.__exit
+            self["clear"] = self.__clear
+            self[""] = self.__print_options
 
 
     def __call__(self):
@@ -138,7 +143,7 @@ class UniHandle:
 
         except KeyboardInterrupt:
             # manual exit forced immediately
-            print(f"\n{self.exit()}")
+            print(f"\n{self.__exit()}")
 
     def __menu_loop(self):
         # input stages
@@ -152,25 +157,20 @@ class UniHandle:
         while self.__keep_running:
             # get user input
             raw_args = input("> ")
-            # If nothing hath been given
-            if raw_args == "":
-                # print options
-                print(self)
-            else:
-                # convert the input string into args
-                seperated_args = self.__proccess_text(raw_args)
-                # generate a list of functions with the args attributed to each.
-                compiled_funcs = self.__compile_funcs(seperated_args)
-                # send these coalated args into the exectution func
-                self.__execute_funcs(compiled_funcs)
+            # convert the input string into args
+            seperated_args = self.__proccess_text(raw_args)
+            # generate a list of functions with the args attributed to each.
+            compiled_funcs = self.__compile_funcs(seperated_args)
+            # send these coalated args into the exectution func
+            self.__execute_funcs(compiled_funcs)
 
-    def exit(self):
+    def __exit(self):
         """Exit after all queued commands."""
         self.__keep_running = False
         return "Exit queued."
 
     # Source (01.06.25) https://www.geeksforgeeks.org/clear-screen-python/
-    def clear(self):
+    def __clear(self):
         """Clear the terminal."""
         # windows support
         if name == "nt":
@@ -183,6 +183,9 @@ class UniHandle:
             # You're on your own.
             print(f"OS ({name}) is not yet supported.")
 
+    def __print_options(self):
+        # Print off the options when the enter key is pressed
+        return str(self)
 
     def __setitem__(self, key, function):
         """Add a new option to execute | [key] = (func, decription)"""
@@ -232,8 +235,8 @@ class UniHandle:
                 # append to the last item in the list
                 last_item.set_value(last_item.get_value() + char)
 
-        # if the last char is a space, remove it
-        if output_list.peek_last() == "":
+        # if the last char is a space (and not just a blank input, remove it
+        if len(output_list) > 1 and output_list.peek_last() == "":
             output_list.pop_last()
         return output_list
 
@@ -300,16 +303,19 @@ class UniHandle:
         # go through the args
         for func in comiled_funcs:
             # Else, perform the opperation with name before.
-            print(f"{func.key()}:    ", end="")
+            if func.key() != "": 
+                print(f"{func.key()}:    ", end="")
             # perform func, print output
             print(func())
 
     def __str__(self):
         """Return the stored values as a text block \\n seperated."""
-        out_string = ""
+        out_string = "\n"
         # get function keys
         for key in self.__keys:
-            out_string += f"\n{key}:   {self.__options_dict[key]}"
+            # if wants to be printed (has docstring).
+            if self.__options_dict[key].get_doc() is not None:
+                out_string += f"{key}:   {self.__options_dict[key]}\n"
         return out_string
 
 def fish(test):
