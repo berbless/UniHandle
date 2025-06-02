@@ -150,9 +150,6 @@ class UniHandle:
         seperated_args = DSALinkedListDouble()
         compiled_funcs = DSALinkedListDouble()
 
-        # print options
-        print(self)
-
         while self.__keep_running:
             # get user input
             raw_args = input("> ")
@@ -303,8 +300,8 @@ class UniHandle:
         for func in comiled_funcs:
             # Else, perform the opperation with name before.
             if func.key() != "":
-                print(f"{func.key()}:    ", end="")
-            # perform func, print output
+                print(f"{func.key()}:\n", end="")
+            # perform func and print func
             print(func())
 
     def __str__(self):
