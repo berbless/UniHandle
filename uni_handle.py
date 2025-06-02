@@ -38,7 +38,6 @@ class UniWrap:
     def __len__(self):
         """Return the quantity of args."""
         count = self.__function.__code__.co_argcount
-        # TODO: Optional flags, how? Read all as such.
         if ismethod(self.__function):
             count -= 1
         return count
@@ -303,7 +302,7 @@ class UniHandle:
         # go through the args
         for func in comiled_funcs:
             # Else, perform the opperation with name before.
-            if func.key() != "": 
+            if func.key() != "":
                 print(f"{func.key()}:    ", end="")
             # perform func, print output
             print(func())
