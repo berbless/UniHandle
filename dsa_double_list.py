@@ -166,6 +166,10 @@ class DSALinkedListDouble:
             if self.__head is not None:
                 self.__head.set_prev(None)
 
+            # if now blank, blank
+            if self.__count == 0:
+                self.__tail = None
+
             # return last head
             if output is not None:
                 output = output.get_value()
@@ -186,6 +190,10 @@ class DSALinkedListDouble:
             # if tails is not none, set the next to it to None
             if self.__tail is not None:
                 self.__tail.set_next(None)
+
+            # if now blank, blank
+            if self.__count == 0:
+                self.__head = None
 
             # return last head
             if output is not None:
