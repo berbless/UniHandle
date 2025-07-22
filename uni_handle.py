@@ -118,7 +118,7 @@ class UniHandle:
         if include_predefined:
             self["exit"] = self.__exit
             self["clear"] = self.__clear
-            self[""] = self.__print_options
+            self[""] = self.__get_options
 
 
     def __call__(self):
@@ -138,6 +138,9 @@ class UniHandle:
                 sys_inputs = self.__compile_funcs(sys_inputs)
                 # send these coalated args into the exectution func
                 self.__execute_funcs(sys_inputs)
+            else:
+                # print first menu
+                print(self.__get_options())
 
             # open the menu if need to
             if self.__keep_running:
@@ -183,7 +186,7 @@ class UniHandle:
             # You're on your own.
             print(f"OS ({name}) is not yet supported.")
 
-    def __print_options(self):
+    def __get_options(self):
         # Print off the options when the enter key is pressed
         return str(self)
 
@@ -320,8 +323,7 @@ class UniHandle:
 
 def fish(test):
     """fish | test function"""
-    print(test)
-    return "THIS IS A TEST"
+    print(f"TEST FISH: {test}")
 
 # Default main func starter.
 if __name__ == "__main__":
