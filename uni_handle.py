@@ -11,15 +11,6 @@ from os import name, system
 from inspect import ismethod
 from sys import argv
 
-# If importing as a test, import directly
-if __name__ == "__main__":
-    from dsa_double_list import DSALinkedListDouble
-    from dsa_hash_table import DSAHashTable
-else:
-    # If being imported during runtime, then reference from the module
-    from UniHandle.dsa_double_list import DSALinkedListDouble
-    from UniHandle.dsa_hash_table import DSAHashTable
-
 class UniWrap:
     """
     Function item for use in UniHandle. Holds a function and it's description. 
@@ -110,8 +101,8 @@ class UniHandle:
         keepOpen: boolean - decides if a close command is needed.
         """
         # assign the objects here to prevent pointer sharing hell
-        self.__options_dict = DSAHashTable(4)
-        self.__keys = DSALinkedListDouble()
+        self.__options_dict = {}
+        self.__keys = []
 
         self.__keep_running = keep_open
         # add the predefined commands
@@ -123,17 +114,13 @@ class UniHandle:
 
     def __call__(self):
         """Initialises and runs proccess."""
-        # create holder for system args
-        sys_inputs = DSALinkedListDouble()
-        # import and convert them to assignment legal object
-        sys_inputs.import_list(argv)
-        # remove the initial flag (filename)
-        sys_inputs.pop_first()
+        # create holder for system args and remove the initial flag (filename)
+        sys_inputs = argv[1::]
 
         # try catch wrapper for keyboard interupts
         try:
             # If user input is given through sys argv
-            if sys_inputs.length() > 0:
+            if len(sys_inputs) > 0:
                 # generate a list of functions with the args attributed to each.
                 sys_inputs = self.__compile_funcs(sys_inputs)
                 # send these coalated args into the exectution func
@@ -154,8 +141,8 @@ class UniHandle:
     def __menu_loop(self):
         # input stages
         raw_args = ""
-        seperated_args = DSALinkedListDouble()
-        compiled_funcs = DSALinkedListDouble()
+        seperated_args = []
+        compiled_funcs = []
 
         while self.__keep_running:
             # get user input
@@ -193,7 +180,7 @@ class UniHandle:
     def __setitem__(self, key, function):
         """Add a new option to execute | [key] = (func, decription)"""
         self.__options_dict[key] = UniWrap(function, key)
-        self.__keys.insert_last(key)
+        self.__keys.append(key)
 
 
     def __getitem__(self, key):
@@ -206,20 +193,17 @@ class UniHandle:
         # loop until proccessed.
         special_char = False
         is_brackets = False
-        output_list = DSALinkedListDouble()
-        last_item = None
+        output_list = []
 
         # give the linked list an initial object
-        output_list.insert_first("")
+        output_list.append("")
 
         # for all chars of the input
         for char in text:
-            # get current last
-            last_item = output_list.get_last()
             # if prev char is an escape char
             if special_char:
                 # append the text to the last item
-                last_item.set_value(last_item.get_value() + char)
+                output_list[-1] += char
                 # switch back to normal mode
                 special_char = False
             # if current char is escape
@@ -230,17 +214,17 @@ class UniHandle:
             elif char == "\"":
                 is_brackets = not is_brackets
             # if a space is inserted not in brackets
-            elif char == " " and not is_brackets and not last_item.get_value() == "":
+            elif char == " " and not is_brackets and not output_list[-1] == "":
                 # add a new entry
-                output_list.insert_last("")
+                output_list.append("")
             # if none of the above, it is just a regular char, or in brackets
             elif char != " " or is_brackets:
                 # append to the last item in the list
-                last_item.set_value(last_item.get_value() + char)
+                output_list[-1] += char
 
         # if the last char is a space (and not just a blank input, remove it
-        if len(output_list) > 1 and output_list.peek_last() == "":
-            output_list.pop_last()
+        if len(output_list) > 1 and output_list[-1] == "":
+            output_list.pop(-1)
         return output_list
 
     def __try_key(self, word):
@@ -248,7 +232,7 @@ class UniHandle:
         func = None
 
         # Do basic validation testing
-        if not self.__options_dict.has_key(word):
+        if not word in self.__options_dict.keys():
             print(f"{word} is not a valid key.")
 
         elif self.__options_dict[word] is None:
@@ -266,38 +250,38 @@ class UniHandle:
         # the current func
         current_function = ""
         # that functions args
-        func_args = DSALinkedListDouble()
+        func_args = []
         # list of functions to perform in order
-        func_list = DSALinkedListDouble()
+        func_list = []
 
         # while there are still args to process
         while len(args) > 0 and not current_function is None:
             # try to pull the func
-            current_function = self.__try_key(args.peek_first())
+            current_function = self.__try_key(args[0])
             # Reset func args
-            func_args = DSALinkedListDouble()
+            func_args = []
 
             if current_function is not None:
                 # remove the next
-                args.pop_first()
+                args.pop(0)
 
                 # while the next is not a word to execute
-                while len(args) > 0 and not self.__options_dict.has_key(args.peek_first()):
+                while len(args) > 0 and not (args[0] in self.__options_dict.keys()):
                     # remove the next arg and add it to the list of args connected to the func
-                    func_args.insert_last(args.pop_first())
+                    func_args.append(args.pop(0))
 
                 # if something went wrong, raise the issue
                 if not current_function.try_set_args(func_args):
                     # Set out to false
-                    func_list = DSALinkedListDouble()
+                    func_list = []
                     # blank out the func
                     current_function = None
                 else:
                     # add the packed func to the list to be executed
-                    func_list.insert_last(current_function)
+                    func_list.append(current_function)
             else:
                 # Error exit value
-                func_list = DSALinkedListDouble()
+                func_list = []
 
         # return the packed list
         return func_list
