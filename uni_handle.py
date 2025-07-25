@@ -7,8 +7,18 @@ Description: Simple universal args and menu tool for executing python functions.
 """
 
 from copy import copy
-import inspect
-import sys
+from os import name, system
+from inspect import ismethod
+from sys import argv
+
+# If importing as a test, import directly
+if __name__ == "__main__":
+    from dsa_double_list import DSALinkedListDouble
+    from dsa_hash_table import DSAHashTable
+else:
+    # If being imported during runtime, then reference from the module
+    from UniHandle.dsa_double_list import DSALinkedListDouble
+    from UniHandle.dsa_hash_table import DSAHashTable
 
 class UniWrap:
     """
@@ -28,8 +38,7 @@ class UniWrap:
     def __len__(self):
         """Return the quantity of args."""
         count = self.__function.__code__.co_argcount
-        # TODO: Optional flags, how?
-        if inspect.ismethod(self.__function):
+        if ismethod(self.__function):
             count -= 1
         return count
 
@@ -39,6 +48,10 @@ class UniWrap:
 
     def __str__(self):
         """Return function description"""
+        return self.__function.__doc__
+
+    def get_doc(self):
+        """Dirty hack to get if this has a docstring to print."""
         return self.__function.__doc__
 
     def __call__(self):
@@ -66,14 +79,14 @@ class UniWrap:
         Instert a list of args into the function. Returns True if valid.
         args: List
         """
-        output = ""
+        output = True
 
         # if the right amount, set args locally
         if len(args) == len(self):
             self.__args = args
-            output = ""
         else:
-            output = f"ArgErr {len(args)}/{len(self)}:{", ".join(args)} | '{self.__key}:{self}'"
+            print(f"ArgErr {len(args)}/{len(self)}:{', '.join(args)} | '{self.__key}:{self}'")
+            output = False
 
         # return if successfull
         return output
@@ -86,69 +99,101 @@ class UniWrap:
 class UniHandle:
     """Universal args and menu tool."""
     # Stored items/functions
-    __options_dict = {}
-
+    __options_dict = None
+    # keys in order (since there is no removing keys, should be a-ok)
+    __keys = None
     # Keep the program running
     __keep_running = True
 
-    # error codes
-    __ERR_INVAL_KEY = -1
-    __ERR_INVAL_DICT = -2
-    __ERR_INVAL_ARGS = -3
-    __ERR_INCMP_ARGS = -4
-
-
-    def __init__(self, keep_open = False):
+    def __init__(self, keep_open = False, include_predefined = True):
         """
         keepOpen: boolean - decides if a close command is needed.
         """
+        # assign the objects here to prevent pointer sharing hell
+        self.__options_dict = DSAHashTable(4)
+        self.__keys = DSALinkedListDouble()
+
         self.__keep_running = keep_open
-        # manually add the exit command
-        self.__options_dict["exit"] = UniWrap(self.exit, "exit")
+        # add the predefined commands
+        if include_predefined:
+            self["exit"] = self.__exit
+            self["clear"] = self.__clear
+            self[""] = self.__get_options
 
 
-    def __call__(self, args=None):
+    def __call__(self):
         """Initialises and runs proccess."""
+        # create holder for system args
+        sys_inputs = DSALinkedListDouble()
+        # import and convert them to assignment legal object
+        sys_inputs.import_list(argv)
+        # remove the initial flag (filename)
+        sys_inputs.pop_first()
+
         # try catch wrapper for keyboard interupts
         try:
-            # call sys args, and hand it through to program.
-            input_args = sys.argv[1::]
+            # If user input is given through sys argv
+            if sys_inputs.length() > 0:
+                # generate a list of functions with the args attributed to each.
+                sys_inputs = self.__compile_funcs(sys_inputs)
+                # send these coalated args into the exectution func
+                self.__execute_funcs(sys_inputs)
+            else:
+                # print first menu
+                print(self.__get_options())
 
-            while self.__keep_running:
-                # args to do
-                if not input_args is None and input_args != [] and input_args != ['']:
-                    # run first args
-                    self.__execute_funcs(input_args)
-                else:
-                    # print options
-                    print(self)
-                if self.__keep_running:
-                    # get user input
-                    input_args = self.__proccess_text(input("> "))
+            # open the menu if need to
+            if self.__keep_running:
+                # perform the menu loop (if set to do so)
+                self.__menu_loop()
 
-            # Run once to just pass initial args through, no menu-ing.
-            self.__execute_funcs(input_args)
-        # If interupted with keyboard, just, exit.
         except KeyboardInterrupt:
-            print("")
-            self.__execute_funcs(["exit"])
+            # manual exit forced immediately
+            print(f"\n{self.__exit()}")
 
+    def __menu_loop(self):
+        # input stages
+        raw_args = ""
+        seperated_args = DSALinkedListDouble()
+        compiled_funcs = DSALinkedListDouble()
 
-    def exit(self):
+        while self.__keep_running:
+            # get user input
+            raw_args = input("> ")
+            # convert the input string into args
+            seperated_args = self.__proccess_text(raw_args)
+            # generate a list of functions with the args attributed to each.
+            compiled_funcs = self.__compile_funcs(seperated_args)
+            # send these coalated args into the exectution func
+            self.__execute_funcs(compiled_funcs)
+
+    def __exit(self):
         """Exit after all queued commands."""
         self.__keep_running = False
         return "Exit queued."
 
+    # Source (01.06.25) https://www.geeksforgeeks.org/clear-screen-python/
+    def __clear(self):
+        """Clear the terminal."""
+        # windows support
+        if name == "nt":
+            system("cls")
+        # Linux / MacOS support
+        elif name == "posix":
+            system("clear")
+        else:
+            # If not one of the three, strange things have happened.
+            # You're on your own.
+            print(f"OS ({name}) is not yet supported.")
 
-    def add(self, key, function):
-        """Add a new option to execute (key: callable, func: executable, decr: readable)"""
-        # add a new item to the dict
-        self.__options_dict[key] = UniWrap(function, key)
-
+    def __get_options(self):
+        # Print off the options when the enter key is pressed
+        return str(self)
 
     def __setitem__(self, key, function):
         """Add a new option to execute | [key] = (func, decription)"""
         self.__options_dict[key] = UniWrap(function, key)
+        self.__keys.insert_last(key)
 
 
     def __getitem__(self, key):
@@ -161,14 +206,20 @@ class UniHandle:
         # loop until proccessed.
         special_char = False
         is_brackets = False
-        output_array = [""]
+        output_list = DSALinkedListDouble()
+        last_item = None
+
+        # give the linked list an initial object
+        output_list.insert_first("")
 
         # for all chars of the input
         for char in text:
+            # get current last
+            last_item = output_list.get_last()
             # if prev char is an escape char
             if special_char:
-                # append
-                output_array[-1] += char
+                # append the text to the last item
+                last_item.set_value(last_item.get_value() + char)
                 # switch back to normal mode
                 special_char = False
             # if current char is escape
@@ -179,24 +230,25 @@ class UniHandle:
             elif char == "\"":
                 is_brackets = not is_brackets
             # if a space is inserted not in brackets
-            elif char == " " and not is_brackets:
+            elif char == " " and not is_brackets and not last_item.get_value() == "":
                 # add a new entry
-                output_array.append("")
+                output_list.insert_last("")
             # if none of the above, it is just a regular char, or in brackets
-            else:
+            elif char != " " or is_brackets:
                 # append to the last item in the list
-                output_array[-1] += char
-        return output_array
+                last_item.set_value(last_item.get_value() + char)
 
-    def __try_key(self, args):
-        # get func 'word'
-        word = args[0]
+        # if the last char is a space (and not just a blank input, remove it
+        if len(output_list) > 1 and output_list.peek_last() == "":
+            output_list.pop_last()
+        return output_list
 
+    def __try_key(self, word):
         # return value
         func = None
 
         # Do basic validation testing
-        if not self.__options_dict.keys().__contains__(word):
+        if not self.__options_dict.has_key(word):
             print(f"{word} is not a valid key.")
 
         elif self.__options_dict[word] is None:
@@ -212,83 +264,66 @@ class UniHandle:
 
     def __compile_funcs(self, args):
         # the current func
-        func = ""
+        current_function = ""
         # that functions args
-        func_args = []
+        func_args = DSALinkedListDouble()
         # list of functions to perform in order
-        func_list = []
-        # Is the current processing valid
-        is_valid = True
+        func_list = DSALinkedListDouble()
 
         # while there are still args to process
-        while len(args) > 0 and not func is None:
+        while len(args) > 0 and not current_function is None:
             # try to pull the func
-            func = self.__try_key(args)
+            current_function = self.__try_key(args.peek_first())
+            # Reset func args
+            func_args = DSALinkedListDouble()
 
-            # if it came through right
-            is_valid = not func is None
-
-            if is_valid:
+            if current_function is not None:
                 # remove the next
-                args.pop(0)
+                args.pop_first()
 
                 # while the next is not a word to execute
-                while len(args) > 0 and not self.__options_dict.keys().__contains__(args[0]):
+                while len(args) > 0 and not self.__options_dict.has_key(args.peek_first()):
                     # remove the next arg and add it to the list of args connected to the func
-                    func_args.append(args.pop(0))
+                    func_args.insert_last(args.pop_first())
 
-                # if not enough values left have been given, raise issue.
-                func_set = func.try_set_args(func_args)
-                if func_set == "":
-                    # if they are, reset func args list (as .
-                    func_args = []
-                else:
-                    # print off what happened
-                    print(func_set)
+                # if something went wrong, raise the issue
+                if not current_function.try_set_args(func_args):
                     # Set out to false
-                    is_valid = False
-                    func_list = None
-
-                # big rewrite,etc
-                if is_valid:
+                    func_list = DSALinkedListDouble()
+                    # blank out the func
+                    current_function = None
+                else:
                     # add the packed func to the list to be executed
-                    func_list.append(func)
+                    func_list.insert_last(current_function)
             else:
                 # Error exit value
-                func_list = None
+                func_list = DSALinkedListDouble()
 
         # return the packed list
         return func_list
 
-
-    def __execute_funcs(self, args):
-        # generate a list of functions with the args attributed to each.
-        packed_functions = self.__compile_funcs(args)
-
-        if not packed_functions is None:
-            for func in packed_functions:
-                # Else, perform the opperation with name before.
-                print(f"{func.key()}:    ", end="")
-
-                # perform func, print output
-                print(func())
-
-
-    def __return_key_string(self, key):
-        return f"{key}:   {self.__options_dict[key]}"
-
+    def __execute_funcs(self, comiled_funcs):
+        # go through the args
+        for func in comiled_funcs:
+            # Else, perform the opperation with name before.
+            if func.key() != "":
+                print(f"{func.key()}:\n", end="")
+            # perform func and print func
+            print(func())
 
     def __str__(self):
         """Return the stored values as a text block \\n seperated."""
-        # Form each key into a formatted structure
-        # Return every key and description
-        key_set = self.__options_dict.keys()
-        return "\n".join([self.__return_key_string(key) for key in key_set])
+        out_string = "\n"
+        # get function keys
+        for key in self.__keys:
+            # if wants to be printed (has docstring).
+            if self.__options_dict[key].get_doc() is not None:
+                out_string += f"{key:<7}:{self.__options_dict[key]}\n"
+        return out_string
 
 def fish(test):
     """fish | test function"""
-    print(test)
-    return "THIS IS A TEST"
+    print(f"TEST FISH: {test}")
 
 # Default main func starter.
 if __name__ == "__main__":
