@@ -318,7 +318,7 @@ class UniHandle:
         for key in self.__keys:
             # if wants to be printed (has docstring).
             if self.__options_dict[key].get_doc() is not None:
-                out_string += f"{key}:   {self.__options_dict[key]}\n"
+                out_string += f"{key:<7}:{self.__options_dict[key]}\n"
         return out_string
 
 def fish(test):
