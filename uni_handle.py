@@ -306,7 +306,7 @@ class UniHandle:
         return out_string
 
 def fish(test):
-    """fish | test function"""
+    """Give a sad fish a name | test function"""
     print(f"TEST FISH: {test}")
 
 # Default main func starter.
