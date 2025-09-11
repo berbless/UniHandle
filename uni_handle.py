@@ -18,6 +18,7 @@ class UniWrap:
     __function = None
     __args = None
     __key = ""
+    __default_output_string = ""
 
     def __init__(self, func, key=""):
         """Wrap a function, give it a description and a key name. Executes args() on call."""
@@ -60,7 +61,7 @@ class UniWrap:
 
         # if nothing is given use a default string
         if output is None:
-            output = ""
+            output = self.__default_output_string
 
         # return the output
         return output
