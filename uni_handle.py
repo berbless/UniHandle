@@ -267,7 +267,7 @@ class UniHandle:
                 args.pop(0)
 
                 # while the next is not a word to execute
-                while len(args) > 0 and not (args[0] in self.__options_dict.keys()):
+                while len(args) > 0 and not args[0] in self.__options_dict.keys():
                     # remove the next arg and add it to the list of args connected to the func
                     func_args.append(args.pop(0))
 
