@@ -95,18 +95,24 @@ class UniHandle:
     __options_dict = None
     # Keep the program running
     __keep_open = True
+    # Show hidden/blank functions
+    __show_hidden = False
     # Symbol used in command line 'head' -> "> ..."
     __cmd_symbol = "> "
 
-    def __init__(self, keep_open = False, include_predefined = True):
+    def __init__(self, keep_open = False, include_predefined = True, show_hidden = False):
         """
-        keep_open: boolean - decides if a close command is needed.
+        keep_open:          boolean - decides if a close command is needed.
         include_predefined: boolean - auto set [clear, exit, and "" options]
+        show_hidden:        boolean - show functions without docstrings.
         """
         # assign the dictionary to prevent pointer sharing hell
         self.__options_dict = {}
+
         # set default value to the startup flags.
         self.__keep_open = keep_open
+        self.__show_hidden = show_hidden
+
         # add the predefined commands
         if include_predefined:
             self["exit"] = self.__exit
@@ -283,7 +289,7 @@ class UniHandle:
         # get function keys
         for item in self.__options_dict.items():
             # if wants to be printed (has docstring).
-            if str(item[1]) != "":
+            if str(item[1]) != "" or item[0] != "" and self.__show_hidden:
                 out_string += f"{item[0]:<7}:{item[1]}\n"
         return out_string
 
