@@ -68,7 +68,7 @@ class UniWrap:
 
     def set_args(self, args):
         """
-        Instert a list of args into the function. Returns True if valid.
+        Instert a list of args into the function.
         args: List
         """
 
