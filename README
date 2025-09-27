@@ -1,0 +1,12 @@
+### How To Handle
+1. Import the UniHandle from uni_handle.py file 
+2. Create new UniHandle object where you wish the menu loop to sit
+	Several launch flags are available:
+		keep_open          | allow for CLI input past start args.
+		include_predefined | add default clear screen, exit application menu items.
+		show_hidden        | include items without a docstring in the menu.
+		no_menu            | if you really want *nothing*, you can turn off the menu entirely.
+3. Add your functions to the object 
+	handle["key"] = function
+4. Run the handle object
+	handle()
