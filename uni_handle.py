@@ -2,7 +2,7 @@
 Title: Uni(versal) Handle(r) / UniHandle
 Author: Kathryn Phillips
 Created: 25.03.25 | DD.MM.YY
-Version: 0.5.8 (25.07.25) | DD.MM.YY
+Version: 0.6.0 (28.09.25) | DD.MM.YY
 Description: Simple universal args and menu tool for executing python functions.
 """
 
