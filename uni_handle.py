@@ -40,11 +40,15 @@ class UniWrap:
 
     def __str__(self):
         """Return function description"""
-        return self.__function.__doc__
+        # get possible docstring.
+        output = self.__function.__doc__
 
-    def get_doc(self):
-        """Dirty hack to get if this has a docstring to print."""
-        return self.__function.__doc__
+        # if the output string will be none, switch it to just blank.
+        if output is None:
+            output = ""
+
+        # return the output string
+        return output
 
     def __call__(self):
         """
@@ -279,7 +283,7 @@ class UniHandle:
         # get function keys
         for item in self.__options_dict.items():
             # if wants to be printed (has docstring).
-            if item[1].get_doc() is not None:
+            if str(item[1]) != "":
                 out_string += f"{item[0]:<7}:{item[1]}\n"
         return out_string
 
