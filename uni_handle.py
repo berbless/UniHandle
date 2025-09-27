@@ -113,11 +113,13 @@ class UniHandle:
         self.__keep_open = keep_open
         self.__show_hidden = show_hidden
 
+        # add hidden show menu options input item.
+        self[""] = self.__get_options
+
         # add the predefined commands
         if include_predefined:
             self["exit"] = self.__exit
             self["clear"] = self.__clear
-            self[""] = self.__get_options
 
 
     def __call__(self):
