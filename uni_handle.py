@@ -97,14 +97,17 @@ class UniHandle:
     __keep_open = True
     # Show hidden/blank functions
     __show_hidden = False
+    # turn off the menu
+    __no_menu = False
     # Symbol used in command line 'head' -> "> ..."
     __cmd_symbol = "> "
 
-    def __init__(self, keep_open = False, include_predefined = True, show_hidden = False):
+    def __init__(self, keep_open = False, include_predefined = True, show_hidden = False, no_menu = False):
         """
         keep_open:          boolean - decides if a close command is needed.
         include_predefined: boolean - auto set [clear, exit, and "" options]
         show_hidden:        boolean - show functions without docstrings.
+        no_menu:            boolean - do not include a menu at all
         """
         # assign the dictionary to prevent pointer sharing hell
         self.__options_dict = {}
@@ -112,9 +115,12 @@ class UniHandle:
         # set default value to the startup flags.
         self.__keep_open = keep_open
         self.__show_hidden = show_hidden
+        self.__no_menu = no_menu
 
-        # add hidden show menu options input item.
-        self[""] = self.__get_options
+        # if a menu is wanted.
+        if not no_menu:
+            # add hidden show menu options input item.
+            self[""] = self.__get_options
 
         # add the predefined commands
         if include_predefined:
@@ -244,6 +250,8 @@ class UniHandle:
     def __compile_funcs(self, args):
         # the current func
         current_function = ""
+        # the current arg
+        current_arg = ""
         # that functions args
         func_args = []
         # list of functions to perform in order
@@ -252,19 +260,23 @@ class UniHandle:
         try:
             # while there are still args to process
             while len(args) > 0:
-                # pop the next to be tested.
-                current_function = self.__get_wrapper(args.pop(0))
-                # Reset func args
-                func_args = []
+                # get the next arg
+                current_arg = args.pop(0)
+                # If the arg is permitted (no_menu isn't enabled.)
+                if not(self.__no_menu) or current_arg != "":
+                    # pop the next to be tested.
+                    current_function = self.__get_wrapper(current_arg)
+                    # Reset func args
+                    func_args = []
 
-                # while the next is not a word to execute
-                while len(args) > 0 and not args[0] in self.__options_dict:
-                    # remove the next arg and add it to the list of args connected to the func
-                    func_args.append(args.pop(0))
+                    # while the next is not a word to execute
+                    while len(args) > 0 and not args[0] in self.__options_dict:
+                        # remove the next arg and add it to the list of args connected to the func
+                        func_args.append(args.pop(0))
 
-                # add the packed func to the list to be executed
-                current_function.set_args(func_args)
-                func_list.append(current_function)
+                    # add the packed func to the list to be executed
+                    current_function.set_args(func_args)
+                    func_list.append(current_function)
 
         # if a problem occurs, skip out, clear to be returned and complain at user (smh).
         except (ValueError, KeyError) as err:
