@@ -66,22 +66,19 @@ class UniWrap:
         # return the output
         return output
 
-    def try_set_args(self, args):
+    def set_args(self, args):
         """
         Instert a list of args into the function. Returns True if valid.
         args: List
         """
-        output = True
 
-        # if the right amount, set args locally
-        if len(args) == len(self):
-            self.__args = args
-        else:
-            print(f"ArgErr {len(args)}/{len(self)}:{', '.join(args)} | '{self.__key}:{self}'")
-            output = False
+        # not the right amount of arguments/perameters
+        if len(args) != len(self):
+            # raise Value Error.
+            raise ValueError(f"ArgErr {len(args)}/{len(self)}:{', '.join(args)} | '{self.__key}:{self}'")
 
-        # return if successfull
-        return output
+        # set args locally
+        self.__args = args
 
     def key(self):
         """ return the key (value to run)""" 
@@ -92,20 +89,20 @@ class UniHandle:
     """Universal args and menu tool."""
     # Stored items/functions
     __options_dict = None
-    # keys in order (since there is no removing keys, should be a-ok)
-    __keys = None
     # Keep the program running
-    __keep_running = True
+    __keep_open = True
+    # Symbol used in command line 'head' -> "> ..."
+    __cmd_symbol = "> "
 
     def __init__(self, keep_open = False, include_predefined = True):
         """
-        keepOpen: boolean - decides if a close command is needed.
+        keep_open: boolean - decides if a close command is needed.
+        include_predefined: boolean - auto set [clear, exit, and "" options]
         """
-        # assign the objects here to prevent pointer sharing hell
+        # assign the dictionary to prevent pointer sharing hell
         self.__options_dict = {}
-        self.__keys = []
-
-        self.__keep_running = keep_open
+        # set default value to the startup flags.
+        self.__keep_open = keep_open
         # add the predefined commands
         if include_predefined:
             self["exit"] = self.__exit
@@ -116,48 +113,40 @@ class UniHandle:
     def __call__(self):
         """Initialises and runs proccess."""
         # create holder for system args and remove the initial flag (filename)
-        sys_inputs = argv[1::]
+        sys_inputs = " ".join(argv[1::])
 
         # try catch wrapper for keyboard interupts
         try:
-            # If user input is given through sys argv
-            if len(sys_inputs) > 0:
-                # generate a list of functions with the args attributed to each.
-                sys_inputs = self.__compile_funcs(sys_inputs)
-                # send these coalated args into the exectution func
-                self.__execute_funcs(sys_inputs)
-            else:
-                # print first menu
-                print(self.__get_options())
-
-            # open the menu if need to
-            if self.__keep_running:
-                # perform the menu loop (if set to do so)
-                self.__menu_loop()
-
+            # perform the menu loop at least once if has user input.
+            self.__menu_loop(sys_inputs)
         except KeyboardInterrupt:
-            # manual exit forced immediately
+            # exit (and print exit dialog, so it is consistent)
             print(f"\n{self.__exit()}")
 
-    def __menu_loop(self):
+    def __menu_loop(self, given_input):
         # input stages
-        raw_args = ""
+        raw_args = given_input
         seperated_args = []
         compiled_funcs = []
 
-        while self.__keep_running:
-            # get user input
-            raw_args = input("> ")
+        while self.__keep_open or raw_args != "":
             # convert the input string into args
             seperated_args = self.__proccess_text(raw_args)
             # generate a list of functions with the args attributed to each.
             compiled_funcs = self.__compile_funcs(seperated_args)
             # send these coalated args into the exectution func
             self.__execute_funcs(compiled_funcs)
+            # try if needs to close
+            if self.__keep_open:
+                # get user input
+                raw_args = input(self.__cmd_symbol)
+            else:
+                # clear rem input just in case
+                raw_args = ""
 
     def __exit(self):
         """Exit after all queued commands."""
-        self.__keep_running = False
+        self.__keep_open = False
         return "Exit queued."
 
     # Source (01.06.25) https://www.geeksforgeeks.org/clear-screen-python/
@@ -179,22 +168,23 @@ class UniHandle:
         return str(self)
 
     def __setitem__(self, key, function):
-        """Add a new option to execute | [key] = (func, decription)"""
+        """Add a new option to execute | [key] = func"""
         self.__options_dict[key] = UniWrap(function, key)
-        self.__keys.append(key)
-
 
     def __getitem__(self, key):
+        """Return UniWrap Object"""
         return self.__options_dict[key]
-
 
     def __proccess_text(self, text):
         # split on space, unless between " ", or with \ before.
-        # ignore \ if \\, then convert to litteral.
+        # ignore \ if \\, then convert to 'litteral' (input \ as char).
         # loop until proccessed.
         special_char = False
         is_brackets = False
         output_list = []
+
+        # .strip() to simplify the madness
+        text = text.strip()
 
         # give the linked list an initial object
         output_list.append("")
@@ -223,28 +213,20 @@ class UniHandle:
                 # append to the last item in the list
                 output_list[-1] += char
 
-        # if the last char is a space (and not just a blank input, remove it
-        if len(output_list) > 1 and output_list[-1] == "":
-            output_list.pop(-1)
+        # return the now neatly organised input
         return output_list
 
-    def __try_key(self, word):
-        # return value
-        func = None
+    def __get_wrapper(self, word):
+        # Check if option is in the dictionary.
+        if not word in self.__options_dict:
+            raise KeyError(f"{word} is not a valid key.")
 
-        # Do basic validation testing
-        if not word in self.__options_dict.keys():
-            print(f"{word} is not a valid key.")
+        # Check if the option is a functional thing.
+        if self.__options_dict[word] is None:
+            raise KeyError(f"{word} has invalid entry in Dict.")
 
-        elif self.__options_dict[word] is None:
-            print(f"{word} has invalid entry in Dict.")
-
-        else:
-            # get func
-            func = copy(self.__options_dict[word])
-
-        # return func
-        return func
+        # return UniWrap or None if failed.
+        return copy(self.__options_dict[word])
 
 
     def __compile_funcs(self, args):
@@ -255,36 +237,31 @@ class UniHandle:
         # list of functions to perform in order
         func_list = []
 
-        # while there are still args to process
-        while len(args) > 0 and not current_function is None:
-            # try to pull the func
-            current_function = self.__try_key(args[0])
-            # Reset func args
-            func_args = []
-
-            if current_function is not None:
-                # remove the next
-                args.pop(0)
+        try:
+            # while there are still args to process
+            while len(args) > 0:
+                # pop the next to be tested.
+                current_function = self.__get_wrapper(args.pop(0))
+                # Reset func args
+                func_args = []
 
                 # while the next is not a word to execute
-                while len(args) > 0 and not args[0] in self.__options_dict.keys():
+                while len(args) > 0 and not args[0] in self.__options_dict:
                     # remove the next arg and add it to the list of args connected to the func
                     func_args.append(args.pop(0))
 
-                # if something went wrong, raise the issue
-                if not current_function.try_set_args(func_args):
-                    # Set out to false
-                    func_list = []
-                    # blank out the func
-                    current_function = None
-                else:
-                    # add the packed func to the list to be executed
-                    func_list.append(current_function)
-            else:
-                # Error exit value
-                func_list = []
+                # add the packed func to the list to be executed
+                current_function.set_args(func_args)
+                func_list.append(current_function)
 
-        # return the packed list
+        # if a problem occurs, skip out, clear to be returned and complain at user (smh).
+        except (ValueError, KeyError) as err:
+            # print the err
+            print(err)
+            # Set out to false
+            func_list = []
+
+        # return the packed list if successfull
         return func_list
 
     def __execute_funcs(self, comiled_funcs):
@@ -300,10 +277,10 @@ class UniHandle:
         """Return the stored values as a text block \\n seperated."""
         out_string = "\n"
         # get function keys
-        for key in self.__keys:
+        for item in self.__options_dict.items():
             # if wants to be printed (has docstring).
-            if self.__options_dict[key].get_doc() is not None:
-                out_string += f"{key:<7}:{self.__options_dict[key]}\n"
+            if item[1].get_doc() is not None:
+                out_string += f"{item[0]:<7}:{item[1]}\n"
         return out_string
 
 def fish(test):
