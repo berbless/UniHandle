@@ -79,7 +79,8 @@ class UniWrap:
         # not the right amount of arguments/perameters
         if len(args) != len(self):
             # raise Value Error.
-            raise ValueError(f"ArgErr {len(args)}/{len(self)}:{', '.join(args)} | '{self.__key}:{self}'")
+            err_st = f"ArgErr {len(args)}/{len(self)}:{', '.join(args)} | '{self.__key}:{self}'"
+            raise ValueError(err_st)
 
         # set args locally
         self.__args = args
@@ -102,7 +103,11 @@ class UniHandle:
     # Symbol used in command line 'head' -> "> ..."
     __cmd_symbol = "> "
 
-    def __init__(self, keep_open = False, include_predefined = True, show_hidden = False, no_menu = False):
+    def __init__(self,
+        keep_open = False,
+        include_predefined = True,
+        show_hidden = False,
+        no_menu = False):
         """
         keep_open:          boolean - decides if a close command is needed.
         include_predefined: boolean - auto set [clear, exit, and "" options]
