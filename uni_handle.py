@@ -34,10 +34,6 @@ class UniWrap:
             count -= 1
         return count
 
-    def len(self):
-        """Return the quantity of args."""
-        return len(self)
-
     def __str__(self):
         """Return function description"""
         # get possible docstring.
@@ -144,7 +140,7 @@ class UniHandle:
             self.__menu_loop(sys_inputs)
         except KeyboardInterrupt:
             # exit (and print exit dialog, so it is consistent)
-            print(f"\n{self.__exit()}")
+            print(f"\nExiting immediately.")
 
     def __menu_loop(self, given_input):
         # input stages
