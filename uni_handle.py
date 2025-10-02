@@ -140,7 +140,7 @@ class UniHandle:
             self.__menu_loop(sys_inputs)
         except KeyboardInterrupt:
             # exit
-            print(f"\nExiting immediately.")
+            print("\nExiting immediately.")
 
     def __menu_loop(self, given_input):
         # input stages
