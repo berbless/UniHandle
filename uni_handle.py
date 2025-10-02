@@ -139,7 +139,7 @@ class UniHandle:
             # perform the menu loop at least once if has user input.
             self.__menu_loop(sys_inputs)
         except KeyboardInterrupt:
-            # exit (and print exit dialog, so it is consistent)
+            # exit
             print(f"\nExiting immediately.")
 
     def __menu_loop(self, given_input):
