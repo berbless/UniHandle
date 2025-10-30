@@ -7,78 +7,51 @@ Description: Simple universal args and menu tool for executing python functions.
 
 from os import name, system
 from sys import argv
-from enum import Enum
+
 
 from .storage import wrap_hold
 from .processing import test_processing as proc
-
-class In(Enum):
-    pass
-
-class Out(Enum):
-    pass
+from .options.opt_enums import In,Out
 
 class UniHandle:
     """Universal args and menu tool."""
     # The dictionary-like component
     __dic_hold = wrap_hold.WrapHold()
     # input enum
-    In = None
+    __in = In.BOTH
     # OutputEnum
-    Out = None
+    __out = Out.MENU
     # Symbol used in command line 'head' -> "> ..."
     __cmd_symbol = "> "
 
-    # Keep the program running
-    __keep_open = True
-    # Show hidden/blank functions
-    __show_hidden = False
-    # turn off the menu
-    __no_menu = False
-    # Do not read argv during parsing
-    __ignore_argv = False
-
-    # include_predefined
-
-    # In [ARGV, BOTH, INPUT]
-        # keep_open
-        # ignore_argv
-    # Show [NONE, MENU, ALL]
-        # show_hidden
-        # no_menu
-
-    def __init__(self,
-        keep_open = False,
-        include_predefined = True,
-        show_hidden = False,
-        no_menu = False,
-        ignore_argv = False):
+    def __init__(self, in_opt = In.BOTH, out_opt = Out.MENU):
         """
-        keep_open:          boolean - decides if a close command is needed.
-        include_predefined: boolean - auto set [clear, exit, and "" options]
-        show_hidden:        boolean - show functions without docstrings.
-        no_menu:            boolean - do not include a menu at all
-        ignore_argv:        boolean - do not take argv as first call.
+        in_opt:
+            - ARGV => Only take in startup arguments.
+            - INPUT => Only take in menu loop options.
+            - BOTH => Take in both argv and menu loop.
+
+        out_opt:
+            - NONE => Do not include menu entry.
+            - MENU => Include menu entry.
+            - ALL => Print all items in dictionary through menu.
         """
 
         # create new wrap_hold
         self.__dic_hold = wrap_hold.WrapHold()
 
-        # set default value to the startup flags.
-        self.__keep_open = keep_open
-        self.__show_hidden = show_hidden
-        self.__no_menu = no_menu
-        self.__ignore_argv = ignore_argv
+        # set the given option flags.
+        self.__in = in_opt
+        self.__out = out_opt
 
         # if a menu is wanted.
-        if not no_menu:
+        if self.__out != Out.NONE:
             # add hidden show menu options input item.
             self.__dic_hold[""] = self.__get_options
 
         # add the predefined commands
-        if include_predefined:
-            self.__dic_hold["exit"] = self.__exit
-            self.__dic_hold["clear"] = self.__clear
+        self.__dic_hold["exit"] = self.__exit
+        self.__dic_hold["clear"] = self.__clear
 
 
     def __call__(self):
@@ -87,7 +60,7 @@ class UniHandle:
         sys_inputs = ""
 
         # if you want to take in argv, do so.
-        if not self.__ignore_argv:
+        if not self.__in == In.ARGV:
             sys_inputs = " ".join(argv[1::])
 
         # try catch wrapper for keyboard interupts
@@ -113,15 +86,16 @@ class UniHandle:
         seperated_args = []
         compiled_funcs = []
 
-        while self.__keep_open or (not self.__no_menu and raw_args != ""):
+        while self.__in.value > In.ARGV.value or (raw_args != "" and self.__out.value > Out.NONE.value):
+            # TODO: CONT HERE
             # convert the input string into args
             seperated_args = proc.proccess_text(raw_args)
             # generate a list of functions with the args attributed to each.
             compiled_funcs = proc.compile_funcs(seperated_args, self.__dic_hold)
             # send these coalated args into the exectution func
             self.__execute_funcs(compiled_funcs)
-            # try if needs to close
-            if self.__keep_open:
+            # See if still open
+            if self.__in.value > In.ARGV.value:
                 # get user input
                 raw_args = input(self.__cmd_symbol)
             else:
@@ -130,7 +104,7 @@ class UniHandle:
 
     def __exit(self):
         """Exit after all queued commands."""
-        self.__keep_open = False
+        self.__in = In.NONE
         return "Exit queued."
 
     # Source (01.06.25) https://www.geeksforgeeks.org/clear-screen-python/
@@ -151,7 +125,7 @@ class UniHandle:
         """Return the stored values as a text block \\n seperated."""
         out_string = "\n"
         # get function keys
-        for item in self.__dic_hold.items(show_hidden = self.__show_hidden):
+        for item in self.__dic_hold.items(self.__out == Out.ALL):
             # print the gained ones out.
             out_string += f"{item[0]:<7}:{item[1]}\n"
         return out_string

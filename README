@@ -1,16 +1,25 @@
-### How To Handle
-1. Import the UniHandle from uni_handle.py file 
+## How To Handle
+### Import 
+```
+from unihandle import UniHandle, In_Opt, Out_Opt
+```
+- Unihandle - The tool itself
+- In_Opt/Out_Opt - Startup options (Can be skipped)
 
-2. Create new UniHandle object where you wish the menu loop to sit
-	Several launch flags are available:
-		keep_open          | allow for CLI input past start args.
-		include_predefined | add default clear screen, exit application menu items.
-		show_hidden        | include items without a docstring in the menu.
-		no_menu            | if you really want *nothing*, you can turn off the menu entirely.
-		ignore_argv		   | disregard the contents of argv. Use if your program uses argv.
+### Create new UniHandle object where you wish the menu loop to sit
+A launch flag enum is provided for Input and Output (In_Opt/Out_Opt):
+#### ***in_opt***:
+* ARGV => Only take in startup arguments.
+* INPUT => Only take in menu loop options.
+* BOTH => Take in both argv and menu loop.
 
-3. Add your functions to the object 
+#### ***out_opt***:
+* NONE => Do not include menu entry.
+* MENU => Include menu entry.
+* ALL => Print all items in dictionary through menu.
+
+### Add your functions to the object 
 	handle["key"] = function
 
-4. Run the handle object
+### Run the handle object
 	handle()
