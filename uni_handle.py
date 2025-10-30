@@ -96,6 +96,8 @@ class UniHandle:
     __show_hidden = False
     # turn off the menu
     __no_menu = False
+    # Do not read argv during parsing
+    __ignore_argv = False
     # Symbol used in command line 'head' -> "> ..."
     __cmd_symbol = "> "
 
@@ -103,12 +105,14 @@ class UniHandle:
         keep_open = False,
         include_predefined = True,
         show_hidden = False,
-        no_menu = False):
+        no_menu = False,
+        ignore_argv = False):
         """
         keep_open:          boolean - decides if a close command is needed.
         include_predefined: boolean - auto set [clear, exit, and "" options]
         show_hidden:        boolean - show functions without docstrings.
         no_menu:            boolean - do not include a menu at all
+        ignore_argv:        boolean - do not take argv as first call.
         """
         # assign the dictionary to prevent pointer sharing hell
         self.__options_dict = {}
@@ -117,6 +121,7 @@ class UniHandle:
         self.__keep_open = keep_open
         self.__show_hidden = show_hidden
         self.__no_menu = no_menu
+        self.__ignore_argv = ignore_argv
 
         # if a menu is wanted.
         if not no_menu:
@@ -132,7 +137,11 @@ class UniHandle:
     def __call__(self):
         """Initialises and runs proccess."""
         # create holder for system args and remove the initial flag (filename)
-        sys_inputs = " ".join(argv[1::])
+        sys_inputs = ""
+
+        # if you want to take in argv, do so.
+        if not self.__ignore_argv:
+            sys_inputs = " ".join(argv[1::])
 
         # try catch wrapper for keyboard interupts
         try:
@@ -314,7 +323,7 @@ def fish(test):
 
 # Default main func starter.
 if __name__ == "__main__":
-    handle = UniHandle(keep_open=True)
+    handle = UniHandle(keep_open=True, ignore_argv=True)
     # Method: handle[key] = function
     handle["fish"] = fish
     handle()
