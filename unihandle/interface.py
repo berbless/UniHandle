@@ -10,7 +10,7 @@ from sys import argv
 
 
 from .storage import wrap_hold
-from .processing import test_processing as proc
+from .processing import text_processing as proc
 from .options.opt_enums import In,Out
 
 class UniHandle:
