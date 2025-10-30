@@ -10,6 +10,13 @@ from copy import copy
 from os import name, system
 from inspect import ismethod
 from sys import argv
+from enum import Enum
+
+class In(Enum):
+    pass
+
+class Out(Enum):
+    pass
 
 class UniWrap:
     """
@@ -90,6 +97,13 @@ class UniHandle:
     """Universal args and menu tool."""
     # Stored items/functions
     __options_dict = {}
+    # input enum
+    In = None
+    # OutputEnum
+    Out = None
+    # Symbol used in command line 'head' -> "> ..."
+    __cmd_symbol = "> "
+
     # Keep the program running
     __keep_open = True
     # Show hidden/blank functions
@@ -98,8 +112,15 @@ class UniHandle:
     __no_menu = False
     # Do not read argv during parsing
     __ignore_argv = False
-    # Symbol used in command line 'head' -> "> ..."
-    __cmd_symbol = "> "
+
+    # include_predefined
+
+    # In [ARGV, BOTH, INPUT]
+        # keep_open
+        # ignore_argv
+    # Show [NONE, MENU, ALL]
+        # show_hidden
+        # no_menu
 
     def __init__(self,
         keep_open = False,
@@ -197,7 +218,13 @@ class UniHandle:
 
     def __setitem__(self, key, function):
         """Add a new option to execute | [key] = func"""
-        self.__options_dict[key] = UniWrap(function, key)
+        # if you are removing something (giving null to it)
+        if function is None:
+            # pop it off
+            self.__options_dict.pop(key)
+        else:
+            # else, add/replace the entry
+            self.__options_dict[key] = UniWrap(function, key)
 
     def __getitem__(self, key):
         """Return UniWrap Object"""
