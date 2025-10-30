@@ -19,7 +19,14 @@ A launch flag enum is provided for Input and Output (In_Opt/Out_Opt):
 * ALL => Print all items in dictionary through menu.
 
 ### Add your functions to the object 
-	handle["key"] = function
+```
+handle["key"] = function
+```
+
+### Remove a function from the object
+```
+handle["key"] = None
+```
 
 ### Run the handle object
 	handle()
