@@ -15,7 +15,7 @@ class UniWrap:
     """
     Function item for use in UniHandle. Holds a function and it's description. 
     """
-    __function = None
+    __function = lambda: None
     __args = None
     __key = ""
     __default_output_string = ""
@@ -89,7 +89,7 @@ class UniWrap:
 class UniHandle:
     """Universal args and menu tool."""
     # Stored items/functions
-    __options_dict = None
+    __options_dict = {}
     # Keep the program running
     __keep_open = True
     # Show hidden/blank functions
