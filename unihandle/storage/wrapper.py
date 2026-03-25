@@ -34,12 +34,13 @@ class UniWrap:
         """Return function description"""
         # get possible docstring.
         output = self.__function.__doc__
-        # strip /n, and extra spaces.
-        output = output.strip("\n\t ")
 
         # if the output string will be none, switch it to just blank.
         if output is None:
             output = ""
+        else:
+            # strip /n, and extra spaces.
+            output = output.strip("\n\t ")
 
         # return the output string
         return output
