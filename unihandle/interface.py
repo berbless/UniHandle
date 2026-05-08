@@ -126,8 +126,8 @@ class UniHandle:
         out_string = "\n"
         # get function keys
         for item in self.__dic_hold.items(self.__out == Out.ALL):
-            # print the gained ones out.
-            out_string += f"{item[0]:<7}:{item[1]}\n"
+                # print the gained ones out.
+                out_string += f"{item[0]:<7}: {item[1]}\n"
         return out_string
 
     def __execute_funcs(self, comiled_funcs):
