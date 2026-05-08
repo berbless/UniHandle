@@ -35,7 +35,7 @@ class WrapHold:
     
     def __not_desc_less(self, tupl):
         """Return if either part of the tuple is not an empty string"""
-        return tupl[0] != "" and tupl[1] != ""
+        return str(tupl[0]) != "" and str(tupl[1]) != ""
 
     def items(self, show_hidden = False):
         """Return the items in the dict"""
